@@ -1,81 +1,170 @@
-const http = require('http');
+const express = require('express');
+const app = express();
+const port = 3000;
+const methodOverride = require('method-override');
 const fs = require('fs');
-const path = require('path');
-const qs = require('querystring');
 
-const dataFilePath = path.join(__dirname, 'users.json');
-let fileData = []; // Initialize as an empty array
+app.use(express.urlencoded());
+app.use(express.json());
+app.set('view engine', 'ejs');
+app.use(methodOverride('_method'));
 
-const server = http.createServer((req, res) => {
-    if (req.method === 'GET' && req.url === '/') {
-        // Serve an HTML form for adding JSON objects
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Add User</title>
-            </head>
-            <body>
-                <h1>Add User</h1>
-                <form method="POST" action="/add-user">
-                    <label for="id">ID:</label>
-                    <input type="text" id="id" name="id" required><br>
-
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required><br>
-
-                    <button type="submit">Add User</button>
-                </form>
-                <h2>Current Users</h2>
-                <ul><!-- Displays each user from a json file with map method -->
-                    ${fileData.map(user => `
-                    <li>
-                        id: ${user.id}, 
-                        name: ${user.name}
-                    </li>
-                    `).join('')}
-                </ul>
-            </body>
-            </html>
-        `;
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(html);
-    } else if (req.method === 'POST' && req.url === '/add-user') {
-        // Handle the form submission to add a new JSON object
-        let body = '';
-        req.on('data', (chunk) => {
-            body += chunk.toString();
-        });
-
-        req.on('end', () => {
-            const formData = qs.parse(body);
-            const newUserData = {
-                id: formData.id,
-                name: formData.name,
-            };
-            // Add the new user object to 'fileData' array
-            fileData.push(newUserData);
-
-            // Save the updated data to a JSON file (optional)
-            fs.writeFileSync(dataFilePath, JSON.stringify(fileData, null, 2), 'utf8');
-
-            res.writeHead(302, { 'Location': '/' }); // Redirect to the main page
-            res.end();
-        });
-    } else if (req.url === '/api/users') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(fileData, null, 2)); // Respond with 'fileData' as JSON
-    } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
-    }
+app.use((req, res, next) => {
+  console.log(`${req.method} request for ${req.url}`);
+  next();
 });
 
-// Initialize 'fileData' with existing JSON data or an empty array
-fileData = fs.existsSync(dataFilePath)
-    ? JSON.parse(fs.readFileSync(dataFilePath, 'utf8'))
-    : [];
+// Read user data from users.json
+let users = [];
+fs.readFile('users.json', 'utf8', (err, data) => {
+  if (!err) {
+    users = JSON.parse(data);
+  }
+});
 
-server.listen(3000, () => {
-    console.log('Server is listening on port 3000');
+//homepage
+app.get('/', (req, res) => {
+  res.send(`
+    <button><a href="/api/v1/users">Get Users List (v1)</a></button>
+    <button><a href="/api/v2/users">Get Users List (v2)</a></button>
+    <button><a href="/api/v1/users/add">Add More User</a></button>
+  `);
+});
+//all users
+app.get('/api/v1/users', (req, res) => {
+    let filteredUsers = [...users]; // copy of users array
+  
+    // Filter by name if the "name" query parameter is present
+    if (req.query.name) {
+      const searchName = req.query.name.toLowerCase();
+      filteredUsers = filteredUsers.filter(user => user.name.toLowerCase().includes(searchName));
+    }
+  
+    // Sort the users based on query parameters
+    if (req.query.sort === 'id') {
+      filteredUsers.sort((a, b) => {
+        if (req.query.order === 'asc') {
+          return a.id - b.id;
+        } else {
+          return b.id - a.id;
+        }
+      });
+    } else if (req.query.sort === 'name') {
+      filteredUsers.sort((a, b) => {
+        if (req.query.order === 'asc') {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.name.localeCompare(a.name);
+        }
+      });
+    }
+  
+    res.render('user.ejs', {version: 'v1', users: filteredUsers, query: req.query });
+  });
+
+app.get('/api/v1/users/add', (req, res) => {
+  res.render('userForm.ejs', { version: 'v1' });
+});
+
+app.get('/api/v1/users/add/:id', (req, res) => {
+  res.render('updateUserForm.ejs', { version: 'v1' });
+});
+
+app.post('/api/v1/users', (req, res) => {
+  const newUser = {
+    id: users.length + 1,
+    name: req.body.name,
+  };
+
+  users.push(newUser);
+
+  // Write the updated user data back to users.json
+  fs.writeFile('users.json', JSON.stringify(users, null, 2), 'utf8', (err) => {
+    if (err) {
+      console.error('Error writing to users.json:', err);
+    }
+  });
+
+  res.redirect('/api/v1/users');
+});
+
+//version 2
+app.get('/api/v2/users', (req, res) => {
+    res.render('user.ejs', { users, version: 'v2' });
+  });
+  
+  app.get('/api/v2/users/add', (req, res) => {
+    res.render('userForm.ejs', { version: 'v2' });
+  });
+  
+  app.post('/api/v2/users', (req, res) => {
+    const newUser = {
+      id: users.length + 1,
+      name: req.body.name,
+    };
+  
+    users.push(newUser);
+  
+    // Write the updated user data back to users.json
+    fs.writeFile('users.json', JSON.stringify(users, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing to users.json:', err);
+      }
+    });
+  
+    res.redirect('/api/v2/users');
+  });
+
+// Define a PUT route handler for updating a user.
+app.put('/api/v1/users/update/:id', (req, res) => {
+  const userId = parseInt(req.params.id);
+  const updatedName = req.body.name;
+
+  const user = users.find(u => u.id === userId);
+
+  if (user) {
+    user.name = updatedName;
+    // Write the updated user data back to users.json
+    fs.writeFile('users.json', JSON.stringify(users, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing to users.json:', err);
+      }
+    });
+
+    res.status(200).send(`User with ID ${userId} updated.`);
+  } else {
+    res.status(404).send(`User with ID ${userId} not found.`);
+  }
+});
+
+// Define a DELETE route handler for deleting a user.
+app.delete('/api/v1/users/delete/:id', (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  const index = users.findIndex(u => u.id === userId);
+
+  if (index !== -1) {
+    users.splice(index, 1);
+
+    // Write the updated user data back to users.json
+    fs.writeFile('users.json', JSON.stringify(users, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing to users.json:', err);
+      }
+    });
+
+    res.redirect('/api/v1/users');
+  } else {
+    res.status(404).send(`User with ID ${userId} not found.`);
+  }
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
 });
