@@ -5,6 +5,21 @@
 </head>
 <body>
     <h1>User List</h1>
+    
+    <!-- Filter form -->
+    <form method="GET" action="/api/users">
+        <label for="name">Filter by Name:</label>
+        <input type="text" id="name" name="name" value="<%= typeof query !== 'undefined' ? query.name : '' %>">
+        <button type="submit">Filter</button>
+    </form>
+
+    <!-- Sort buttons -->
+    <div>
+        <span>Sort by:</span>
+        <a href="/api/users?sort=id&order=<%= (typeof query !== 'undefined' && query.sort === 'id' && query.order === 'asc') ? 'desc' : 'asc' %>">ID (1-100)</a>
+        <a href="/api/users?sort=name&order=<%= (typeof query !== 'undefined' && query.sort === 'name' && query.order === 'asc') ? 'desc' : 'asc' %>">Name (A-Z)</a>
+    </div>
+
     <ul>
         <% users.forEach(function(user) { %>
         <li>

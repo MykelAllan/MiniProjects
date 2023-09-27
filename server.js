@@ -31,8 +31,35 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/users', (req, res) => {
-  res.render('user.ejs', { users });
-});
+    let filteredUsers = [...users]; // Create a copy of the users array
+  
+    // Filter by name if the "name" query parameter is present
+    if (req.query.name) {
+      const searchName = req.query.name.toLowerCase();
+      filteredUsers = filteredUsers.filter(user => user.name.toLowerCase().includes(searchName));
+    }
+  
+    // Sort the users based on query parameters
+    if (req.query.sort === 'id') {
+      filteredUsers.sort((a, b) => {
+        if (req.query.order === 'asc') {
+          return a.id - b.id;
+        } else {
+          return b.id - a.id;
+        }
+      });
+    } else if (req.query.sort === 'name') {
+      filteredUsers.sort((a, b) => {
+        if (req.query.order === 'asc') {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.name.localeCompare(a.name);
+        }
+      });
+    }
+  
+    res.render('user.ejs', { users: filteredUsers, query: req.query });
+  });
 
 app.get('/api/users/add', (req, res) => {
   res.render('userForm.ejs');
@@ -102,6 +129,12 @@ app.delete('/api/users/delete/:id', (req, res) => {
   } else {
     res.status(404).send(`User with ID ${userId} not found.`);
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
 });
 
 app.listen(port, () => {
