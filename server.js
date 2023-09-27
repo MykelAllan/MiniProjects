@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const methodOverride = require('method-override');
-const fs = require('fs'); // Add the 'fs' module to read the users.json file
+const fs = require('fs');
 
 app.use(express.urlencoded());
 app.use(express.json());
@@ -22,16 +22,17 @@ fs.readFile('users.json', 'utf8', (err, data) => {
   }
 });
 
+//homepage
 app.get('/', (req, res) => {
   res.send(`
-    <button><a href="/api/v1/users">Get Users List</a></button>
+    <button><a href="/api/v1/users">Get Users List (v1)</a></button>
     <button><a href="/api/v2/users">Get Users List (v2)</a></button>
-    <button><a href="/api/users/add">Add More User</a></button>
+    <button><a href="/api/v1/users/add">Add More User</a></button>
   `);
 });
-
+//all users
 app.get('/api/v1/users', (req, res) => {
-    let filteredUsers = [...users]; // Create a copy of the users array
+    let filteredUsers = [...users]; // copy of users array
   
     // Filter by name if the "name" query parameter is present
     if (req.query.name) {
@@ -158,7 +159,7 @@ app.delete('/api/v1/users/delete/:id', (req, res) => {
   }
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
