@@ -24,13 +24,13 @@ fs.readFile('users.json', 'utf8', (err, data) => {
 
 app.get('/', (req, res) => {
   res.send(`
-    <button><a href="/api/users">Get Users List</a></button>
+    <button><a href="/api/v1/users">Get Users List</a></button>
+    <button><a href="/api/v2/users">Get Users List (v2)</a></button>
     <button><a href="/api/users/add">Add More User</a></button>
-  
   `);
 });
 
-app.get('/api/users', (req, res) => {
+app.get('/api/v1/users', (req, res) => {
     let filteredUsers = [...users]; // Create a copy of the users array
   
     // Filter by name if the "name" query parameter is present
@@ -58,18 +58,18 @@ app.get('/api/users', (req, res) => {
       });
     }
   
-    res.render('user.ejs', { users: filteredUsers, query: req.query });
+    res.render('user.ejs', {version: 'v1', users: filteredUsers, query: req.query });
   });
 
-app.get('/api/users/add', (req, res) => {
-  res.render('userForm.ejs');
+app.get('/api/v1/users/add', (req, res) => {
+  res.render('userForm.ejs', { version: 'v1' });
 });
 
-app.get('/api/users/add/:id', (req, res) => {
-  res.render('updateUserForm.ejs');
+app.get('/api/v1/users/add/:id', (req, res) => {
+  res.render('updateUserForm.ejs', { version: 'v1' });
 });
 
-app.post('/api/users', (req, res) => {
+app.post('/api/v1/users', (req, res) => {
   const newUser = {
     id: users.length + 1,
     name: req.body.name,
@@ -84,11 +84,38 @@ app.post('/api/users', (req, res) => {
     }
   });
 
-  res.redirect('/api/users');
+  res.redirect('/api/v1/users');
 });
 
+//version 2
+app.get('/api/v2/users', (req, res) => {
+    res.render('user.ejs', { users, version: 'v2' });
+  });
+  
+  app.get('/api/v2/users/add', (req, res) => {
+    res.render('userForm.ejs', { version: 'v2' });
+  });
+  
+  app.post('/api/v2/users', (req, res) => {
+    const newUser = {
+      id: users.length + 1,
+      name: req.body.name,
+    };
+  
+    users.push(newUser);
+  
+    // Write the updated user data back to users.json
+    fs.writeFile('users.json', JSON.stringify(users, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing to users.json:', err);
+      }
+    });
+  
+    res.redirect('/api/v2/users');
+  });
+
 // Define a PUT route handler for updating a user.
-app.put('/api/users/update/:id', (req, res) => {
+app.put('/api/v1/users/update/:id', (req, res) => {
   const userId = parseInt(req.params.id);
   const updatedName = req.body.name;
 
@@ -110,7 +137,7 @@ app.put('/api/users/update/:id', (req, res) => {
 });
 
 // Define a DELETE route handler for deleting a user.
-app.delete('/api/users/delete/:id', (req, res) => {
+app.delete('/api/v1/users/delete/:id', (req, res) => {
   const userId = parseInt(req.params.id);
 
   const index = users.findIndex(u => u.id === userId);
@@ -125,7 +152,7 @@ app.delete('/api/users/delete/:id', (req, res) => {
       }
     });
 
-    res.redirect('/api/users');
+    res.redirect('/api/v1/users');
   } else {
     res.status(404).send(`User with ID ${userId} not found.`);
   }

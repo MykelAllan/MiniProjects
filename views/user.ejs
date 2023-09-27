@@ -2,9 +2,17 @@
 <html>
 <head>
     <title>User List</title>
+
 </head>
 <body>
-    <h1>User List</h1>
+
+    <% if (version === "v1") { %>
+        <h1>User List V1</h1>
+        <h3>ID - Name</h3>
+    <% } else { %>
+        <h1>User List V2</h1>
+        <h3>Name - ID</h3>
+    <% } %>
     
     <!-- Filter form -->
     <form method="GET" action="/api/users">
@@ -23,8 +31,13 @@
     <ul>
         <% users.forEach(function(user) { %>
         <li>
-            ID: <%= user.id %>, 
-            Name: <%= user.name %>
+            <% if (version === "v1") { %>
+                ID: <%= user.id %>, 
+                Name: <%= user.name %>
+            <% } else { %>
+                Name: <%= user.name %>,
+                ID: <%= user.id %>
+            <% } %>
             <form method="POST" action="/api/users/delete/<%= user.id %>">
                 <input type="hidden" name="_method" value="DELETE">
                 <button type="submit">Delete</button>
@@ -32,5 +45,8 @@
         </li>
         <% }); %>
     </ul>
+    
 </body>
+
+
 </html>
