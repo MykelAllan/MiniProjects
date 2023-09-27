@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+</head>
+<body>
+    <h1>User List</h1>
+    <ul>
+        <% users.forEach(function(user) { %>
+        <li>
+            ID: <%= user.id %>, 
+            Name: <%= user.name %>
+            <form method="POST" action="/api/users/delete/<%= user.id %>">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        <% }); %>
+    </ul>
+</body>
+</html>
