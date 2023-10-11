@@ -4,6 +4,7 @@
 
 - This project is about React.js
 - So a project about understanding basic React such as states, props components, and listings
+
 **Instructions**
 
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
