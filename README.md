@@ -8,10 +8,9 @@
 - - *User Input Limit*: The user input field has a maximum limit of 8 characters to maintain the quality of the data.
 
 **Instructions**
-
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
 - 2... Also make sure your working DIRECTORY is in the name of the repository in this case MiniProjects
-- 3... And then go to frontend directory
+- 3... And then go to **frontend** directory
 - 4... If you currently don't have the node_module
 - 5... You  just need to install them by simply typing " npm install " in the TERMINAL
 - 6... AND to start the server just type in " npm start " in the TERMINAL
