@@ -1,4 +1,4 @@
-# Project-React Basics Objectives
+# Project Advanced React - State and Hooks Objectives
 
 **What It Does**
 
