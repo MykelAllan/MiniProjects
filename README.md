@@ -16,4 +16,3 @@
 - 6... AND to start the server just type in " npm start " in the TERMINAL
 - 7... JUST go to your "localhost:3000" on any web browsers
 - 8... AND THATS IT, ENJOY....
-
