@@ -1,56 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+
+import { useUserManagement } from "./hooks/useUserManagement";
+
+import DisplayUsers from "./components/displayUsers";
+
 
 // Functional component
 const App = () => {
-  const [users, setUsers] = useState([]); // State for users
-  const [newUser, setNewUser] = useState("");
+  const { users, newUser, setNewUser, addUser, setUsers, deleteUser } = useUserManagement();
 
   const addUserHandler = (e) => {
     e.preventDefault();
-    setUsers([...users, newUser]);
+    addUser(newUser);
     setNewUser("");
   }
+
+  const inputHandler = (e) => {
+    const inputVal = e.target.value;
+    if (inputVal.length <= 8) {
+      setNewUser(inputVal);
+    } else {
+      console.log("max limit hit")
+    }
+  }
+
+  useEffect(()=> {
+    document.title = `Users: ${users.length}`
+  })
+
   return (
-    <div>
+    <div className='container'>
       <h1>Add User Form</h1>
-      <form onSubmit={addUserHandler}>
+      <form className="user-form" onSubmit={addUserHandler}>
         <input
+          className="user-input"
           type="text"
-          placeholder="Insert User"
+          placeholder="Insert User (Max 8 Characters)"
           value={newUser}
-          onChange={(e) => setNewUser(e.target.value)} 
+          onChange={inputHandler}
         />
-        <button type="submit" >Add User</button>
+        <button className="user-button" type="submit" >Add User</button>
 
       </form>
-      <DisplayUsers users={users}/>
+      <DisplayUsers users={users} addUser={addUser} setUsers={setUsers} deleteUser={deleteUser} />
     </div>
   );
 };
-
-//Class component with props
-function DisplayUsers(props) {
-  return(
-<div>
-  <h1>List of Users</h1>
-  {/* Condition if users length is greater than 0  
-      show the user if not then show "No User To Show"
-  */}
-  {props.users.length > 0 ? 
-  (
-  <div>
-      {props.users.map((user, index) => (
-        <li key={index}>{user}</li>
-      ))}
-    </div>
-  ) : 
-  (
-    <div>
-      <h4>No Users to Show</h4>
-      </div>
-  )}
-</div>
-  );
-}
 
 export default App;
