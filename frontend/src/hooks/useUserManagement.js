@@ -1,17 +1,25 @@
-import React, {useState, useEffect} from "react";
+import { useState } from "react";
 
 
-//Hook
-function useUserManagement() {
-    const [users, setUsers] = useState([]);
-    const [newUser, setNewUser] = useState("");
-  
-    const addUser = (user) => {
-      setUsers((prevUsers) => [...prevUsers , user]);
+//Hook userManagement
+export const useUserManagement = (initialUsers = []) => {
+  const [users, setUsers] = useState(initialUsers);
+  const [newUser, setNewUser] = useState("");
+
+  const addUser = (user) => {
+    if (user !== "") {
+      const userObj = { name: user, deleted: false };
+      setUsers([...users, userObj]);
+    } else {
+      console.log("no user input")
     }
-  
-    return {users, newUser, setNewUser, addUser};
-    
+  }
+  const deleteUser = (index) => {
+    const updatedUser = [...users];
+    updatedUser.splice(index, 1)
+    setUsers(updatedUser);
   }
 
-export default useUserManagement;
+  return { users, newUser, setNewUser, addUser, setUsers, deleteUser };
+
+}
