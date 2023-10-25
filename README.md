@@ -2,8 +2,10 @@
 
 **What It Does**
 
-- This project is about React.js
-- So a project about understanding basic React such as states, props components, and listings
+- This React.js project focues on useStates and Hooks
+- **Features**
+- - *User Management*: It allows you to manage a list of users, including adding new users and deleting them.
+- - *User Input Limit*: The user input field has a maximum limit of 8 characters to maintain the quality of the data.
 
 **Instructions**
 
