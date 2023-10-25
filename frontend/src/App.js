@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 
+import { useUserManagement } from "./hooks/useUserManagement";
+
+import DisplayUsers from "./components/displayUsers";
+
+
 // Functional component
 const App = () => {
-  const [users, setUsers] = useState([]); // State for users
-  const [newUser, setNewUser] = useState("");
+  const {users, newUser, setNewUser, addUser} = useUserManagement();
+
 
   const addUserHandler = (e) => {
     e.preventDefault();
-    setUsers([...users, newUser]);
+    addUser(newUser)
     setNewUser("");
   }
   return (
@@ -28,29 +33,5 @@ const App = () => {
   );
 };
 
-//Class component with props
-function DisplayUsers(props) {
-  return(
-<div>
-  <h1>List of Users</h1>
-  {/* Condition if users length is greater than 0  
-      show the user if not then show "No User To Show"
-  */}
-  {props.users.length > 0 ? 
-  (
-  <div>
-      {props.users.map((user, index) => (
-        <li key={index}>{user}</li>
-      ))}
-    </div>
-  ) : 
-  (
-    <div>
-      <h4>No Users to Show</h4>
-      </div>
-  )}
-</div>
-  );
-}
 
 export default App;
