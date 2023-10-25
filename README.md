@@ -14,7 +14,7 @@
 - 3... And then go to frontend directory
 - 4... If you currently don't have the node_module
 - 5... You  just need to install them by simply typing " npm install " in the TERMINAL
-- 3... AND to start the server just type in " npm start " in the TERMINAL
-- 5... JUST go to your "localhost:3000" on any web browsers
-- 6... AND THATS IT, ENJOY....
+- 6... AND to start the server just type in " npm start " in the TERMINAL
+- 7... JUST go to your "localhost:3000" on any web browsers
+- 8... AND THATS IT, ENJOY....
 
