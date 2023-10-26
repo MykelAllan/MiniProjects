@@ -11,8 +11,6 @@ function DisplayUsers({ users, deleteUser, setUsers }) {
 
     // deleteUser(index);//Deletes the User
   }
-
-
   return (
     <div>
       <h1>List of Users</h1>
