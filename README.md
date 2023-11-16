@@ -1,4 +1,6 @@
 # Mini-Project7: MongoDB Basics
+#CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/6
+
 
 **What It Does**
 
