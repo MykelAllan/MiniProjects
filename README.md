@@ -1,4 +1,4 @@
-# Mini-Project7: MongoDB Basics
+# Mini-Project8: Mongoose
 #CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/6
 
 

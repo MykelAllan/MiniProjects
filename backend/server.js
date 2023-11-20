@@ -4,10 +4,7 @@ const app = express();
 const port = 3000;
 const methodOverride = require('method-override')
 
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert')
-const uri = "mongodb://localhost:27017"
-const dbName = "MiniProject"
+import mongoose from 'mongoose';
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
