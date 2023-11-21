@@ -1,71 +1,65 @@
-
-const express = require('express')
+import express from 'express';
 const app = express();
 const port = 3000;
-const methodOverride = require('method-override')
+import methodOverride from 'method-override'
 
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert')
-const uri = "mongodb://localhost:27017"
-const dbName = "MiniProject"
+import mongoose from 'mongoose';
+
+import { filterAndSortUsers } from './features/sort.mjs'
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.set('view engine', 'ejs');
 app.use(methodOverride('_method'));
 
-let db;
+const uri = 'mongodb://127.0.0.1:27017/MiniProject'
 
-(async function () {
-  try {
-    const client = await MongoClient.connect("mongodb://localhost:27017");
-    console.log("Connected to MongoDB");
-    db = client.db("MiniProject");
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('connected to MongoDB using Mongoose'))
+  .catch(err => console.log('Could not connect to MongoDB', err));
 
-  } catch (err) {
-    console.log("MongoDB ERROR: ", err);
-  }
-})();
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  id: Number
+})
+
+const User = mongoose.model('users', userSchema)
 
 app.get('/', (req, res) => {
-  res.send(`
-    <button><a href="/api/v1/users">Get Users List (v1)</a></button>
-    <button><a href="/api/v2/users">Get Users List (v2)</a></button>
-    <button><a href="/api/users/add">Add More User</a></button>
-  `);
+  res.render('home')
 });
+
+
+
 
 app.get('/api/v1/users', async (req, res) => {
   try {
-    const users = await db.collection('users').find({}).toArray();
-    res.json({ version: 'v1', users, query: req.query });
+    const users = await User.find();
+    const filteredUsers = filterAndSortUsers(users, req.query)
+    res.render('user', { version: 'v1', users: filteredUsers, query: req.query })
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching users from db");
   }
-});
-
-app.get('/api/v2/users', async (req, res) => {
-  try {
-    const users = await db.collection('users').find({}).toArray();
-    res.json({ version: 'v2', users, query: req.query });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching users from db");
-  }
-});
-
-app.get('/api/users/add', (req, res) => {
-  res.send("Add user form");
 });
 
 app.post('/api/v1/users', async (req, res) => {
-  const newUser = {
-    id: parseInt(req.body.id),
-    name: req.body.name,
-  };
-
+  const { name } = req.body;
   try {
-    await db.collection('users').insertOne(newUser);
+    const maxIDUser = await User.findOne().sort({ id: -1 })
+    const currentID = maxIDUser ? maxIDUser.id + 1 : 1
+
+    const user = new User({
+      name,
+      id: currentID
+    });
+
+    const result = await user.save();
+    console.log("saved successfully", result)
     res.redirect('/api/v1/users');
   } catch (err) {
     console.error(err);
@@ -73,30 +67,78 @@ app.post('/api/v1/users', async (req, res) => {
   }
 });
 
-app.put('/api/users/update/:id', async (req, res) => {
-  const userId = parseInt(req.params.id);
-  const updatedName = req.body.name;
 
+app.get('/api/v2/users', async (req, res) => {
   try {
-    await db.collection('users').updateOne({ id: userId }, { $set: { name: updatedName } });
-    res.status(200).send(`User with ID ${userId} updated.`);
+    const users = await User.find();
+    const filteredUsers = filterAndSortUsers(users, req.query)
+    res.render('user', { version: 'v2', users: filteredUsers, query: req.query })
   } catch (err) {
     console.error(err);
-    res.status(500).send(`Error updating user with ID ${userId}.`);
+    res.status(500).send("Error fetching users from db");
   }
 });
+
+
+app.get('/api/users/add', (req, res) => {
+  res.render('userForm');
+});
+
+app.get('/api/users/update/:id', async (req, res) => {
+  const userID = parseInt(req.params.id);
+
+  try {
+    const user = await User.findOne({ id: userID })
+
+    if (user) {
+      res.render('updateUser', { user })
+    } else {
+      res.status(404).send(`User with ID ${userID} not found`)
+    }
+  } catch {
+    res.status(500).send(`Error fetching user ID`)
+  }
+
+})
+
+app.post('/api/users/update/:id', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const updatedName = req.body.updatedName;
+
+  try {
+    const result = await User.updateOne({ id: userId }, { $set: { name: updatedName } });
+    if (result.matchedCount > 0) {
+      res.redirect('/api/v1/users');
+    } else {
+      res.status(404).send(`User with ID ${userId} not found`);
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(`Error updating user with ID ${userId}`);
+  }
+});
+
 
 app.delete('/api/v1/users/delete/:id', async (req, res) => {
   const userId = parseInt(req.params.id);
 
   try {
-    await db.collection('users').deleteOne({ id: userId });
-    res.redirect('/api/v1/users');
+    const result = await User.deleteOne({ id: userId });
+
+    if (result.deletedCount > 0) {
+      console.log(`User with ID ${userId} deleted successfully.`);
+      res.redirect('/api/v1/users');
+    } else {
+      console.log(`User with ID ${userId} not found.`);
+      res.status(404).send(`User with ID ${userId} not found.`);
+    }
   } catch (err) {
-    console.error(err);
+    console.error(`Error deleting user with ID ${userId}:`, err);
     res.status(500).send(`Error deleting user with ID ${userId}.`);
   }
 });
+
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);

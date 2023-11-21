@@ -1,12 +1,12 @@
-# Mini-Project7: MongoDB Basics
-#CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/6
+# Mini-Project8: Mongoose
+#CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/8
 
 
 **What It Does**
 
 - This project is mostly focusing on database
-- So Retrieving the data from MongoDB
-- And displaying it.
+- So Retrieving the data from MongoDB with mongoose
+- And creating, updating, deleting it.
 
 **Instructions**
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
