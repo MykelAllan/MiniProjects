@@ -5,8 +5,8 @@
 **What It Does**
 
 - This project is mostly focusing on database
-- So Retrieving the data from MongoDB
-- And displaying it.
+- So Retrieving the data from MongoDB with mongoose
+- And creating, updating, deleting it.
 
 **Instructions**
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
