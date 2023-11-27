@@ -1,17 +1,33 @@
 import express from 'express';
-const app = express();
-const port = 3000;
+
 import methodOverride from 'method-override'
 
 import mongoose from 'mongoose';
+import { Strategy as LocalStrategy } from 'passport-local'
+import bcrypt from 'bcryptjs'
+import session from 'express-session'
+import 'dotenv/config'
+const app = express();
+const port = 3000;
 
 import { filterAndSortUsers } from './features/sort.mjs'
+import passport from 'passport';
 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(methodOverride('_method'));
+
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}))
+
+app.use(passport.initialize());
+app.use(passport.session())
 
 const uri = 'mongodb://127.0.0.1:27017/MiniProject'
 
@@ -21,7 +37,42 @@ mongoose.connect(uri, {
 }).then(() => console.log('connected to MongoDB using Mongoose'))
   .catch(err => console.log('Could not connect to MongoDB', err));
 
+//passport
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    const userLogin = await UserLogin.findOne({ username: username })
+    //wrong password entered
+    if (!userLogin || !bcrypt.compareSync(password, userLogin.password)) {
+      console.log("incorrect password and username")
+      return done(null, false, { message: 'Incorrect username or password.' })
+    }
+    //correct password entered
+    console.log("correct password and username")
+    return done(null, userLogin);
+  }
+))
 
+passport.serializeUser((userLogin, done) => {
+  done(null, userLogin.id);
+})
+
+passport.deserializeUser((id, done) => {
+  UserLogin.findById(id).then(user => {
+    done(null, user);
+  }).catch(err => {
+    done(err);
+  });
+});
+
+
+//////////
+const userLoginSchema = new mongoose.Schema({
+  username: String,
+  password: String
+})
+
+const UserLogin = mongoose.model('UserLogins', userLoginSchema)
+//////////
 const userSchema = new mongoose.Schema({
   name: String,
   id: Number
@@ -30,10 +81,50 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('users', userSchema)
 
 app.get('/', (req, res) => {
-  res.render('home')
+  res.render('home', { user: req.user })
 });
 
+//register
+app.get('/register', (req, res) => {
+  res.render('register')
+})
 
+app.post('/register', async (req, res) => {
+  try {
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+
+    const newUserLogin = new UserLogin({ username: req.body.username, password: hashedPassword })
+    await newUserLogin.save();
+    res.redirect('/login')
+  } catch (error) {
+    console.log(error)
+    res.redirect('/register')
+  }
+})
+
+//login
+app.get('/login', (req, res) => {
+  res.render('login')
+})
+
+app.post('/login', (req, res, next) => {
+  console.log('Entered Information:', { username: req.body.username, password: req.body.password });
+  next();
+}, passport.authenticate('local', {
+  failureRedirect: '/login',
+  failureMessage: true,
+  successMessage: true
+}), (req, res) => {
+  res.redirect('/');
+});
+
+//logout
+app.get('/logout', (req, res) => {
+  req.logout(function (err) {
+    if (err) { return next(err); }
+    res.redirect('/')
+  })
+})
 
 
 app.get('/api/v1/users', async (req, res) => {
