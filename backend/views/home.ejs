@@ -1,3 +1,76 @@
-<button><a href="/api/v1/users">Get Users List (v1)</a></button>
-<button><a href="/api/v2/users">Get Users List (v2)</a></button>
-<button><a href="/api/users/add">Add More User</a></button>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            font-family: 'Segoe UI';
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+        }
+        .user-info {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        span {
+            text-transform: uppercase;
+            font-size: xx-large;
+        }
+        h4 {
+            color: #555;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="user-info">
+            <% if (user) { %>
+                <h3>Hello,  <span><%= user.username %>!</span></h3>
+                <button><a href="/logout">Logout</a></button>
+            <% } else { %>
+                <h3>Hello, <span>Guest!</span></h3>
+                <button><a href="/login">Login</a></button>
+            <% } %>
+        </div>
+        <div class="box-container">
+            <h4>What would you like to do?</h4>
+            <div class="btn-container">
+                <button><a href="/api/v1/users">Get Users List (v1)</a></button>
+                <button><a href="/api/v2/users">Get Users List (v2)</a></button>
+                <button><a href="/api/users/add">Add More User</a></button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
