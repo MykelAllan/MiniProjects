@@ -1,12 +1,12 @@
-# Mini-Project8: Mongoose
+# Mini-Project9: Identity Management and Encryption Objectives
 #CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/8
 
 
 **What It Does**
 
-- This project is mostly focusing on database
+- This project is mostly focusing on user authentication using MongoDB
 - So Retrieving the data from MongoDB with mongoose
-- And creating, updating, deleting it.
+- And making sure the user is logged in, and displaying the user.
 
 **Instructions**
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
