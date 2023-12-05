@@ -1,12 +1,11 @@
-# Mini-Project9: Identity Management and Encryption Objectives
-#CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/10
-
+# Mini-Project10: Web Security
+#CODECLIMATE: https://codeclimate.com/github/MykelAllan/MiniProjects/builds/12
 
 **What It Does**
 
-- This project is mostly focusing on user authentication using MongoDB
+- This project is mostly focusing on user authentication & Web security using MongoDB
 - So Retrieving the data from MongoDB with mongoose
-- And making sure the user is logged in, and displaying the user.
+- And making sure the user is logged in, before displaying the data from MongoDB
 
 **Instructions**
 - 1... TO RUN this PROJECT make sure you have your TERMINAL open
